@@ -1,0 +1,45 @@
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+
+model College {
+  id     String @id @default(cuid())
+  name   String
+  users  User[]
+  routes Route[]
+}
+
+model User {
+  id                 String        @id @default(cuid())
+  clerkId            String        @unique
+  collegeId          String
+  college            College       @relation(fields: [collegeId], references: [id])
+  role               Role          @default(STUDENT)
+  name               String
+  email              String        @unique
+  phone              String?
+  verificationStatus Boolean       @default(false)
+  driverProfile      DriverProfile?
+  createdAt          DateTime      @default(now())
+}
+
+model Route {
+  id          String   @id @default(cuid())
+  collegeId   String
+  college     College  @relation(fields: [collegeId], references: [id])
+  origin      String
+  destination String
+  stops       String[]
+  createdBy   String
+}
+
+model DriverProfile {
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  user          User    @relation(fields: [userId], references: [id])
+  vehicleType   String
+  vehicleNumber String
+  ratingAvg     Float   @default(0)
+  totalTrips    Int     @default(0)
+}
+
+enum Role { STUDENT DRIVER ADMIN }
